@@ -1,116 +1,105 @@
 <?php
-include('header.php');
+session_start();
 error_reporting(0);
+include('includes/connection.php');
 ?>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Aden Shop Admin</title>
+    <!-- plugins:css -->
+    <link rel="stylesheet" href="assets/vendors/mdi/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="assets/vendors/css/vendor.bundle.base.css">
+    <!-- endinject -->
+    <!-- Plugin css for this page -->
+    <!-- End plugin css for this page -->
+    <!-- inject:css -->
+    <!-- endinject -->
+    <!-- Layout styles -->
+    <link rel="stylesheet" href="assets/css/style.css">
+    <!-- End layout styles -->
+    <link rel="shortcut icon" href="assets/images/w1.ico" type="image/x-icon">
+  </head>
+  <body>
+    <div class="container-scroller">
+      <div class="container-fluid page-body-wrapper full-page-wrapper">
+        <div class="row w-100 m-0">
+          <div class="content-wrapper full-page-wrapper d-flex align-items-center auth login-bg">
+            <div class="card col-lg-4 mx-auto">
+              <div class="card-body px-5 py-5">
+                <h3 class="card-title text-left mb-3">Login</h3>
 
-<style>
-    .divider:after,
-    .divider:before {
-    content: "";
-    flex: 1;
-    height: 1px;
-    background: #eee;
-    }
-</style>
+                <!-- Login Query -->
+                <?php
+                if(isset($_POST['login'])){
+                    $email=$_POST['email'];
+                    $password=$_POST['password'];
 
-<div class="container p-5">
-    <div class="col-md-12">
-    <section class="vh-100">
-      <div class="container py-5 h-100 my-4">
-        <div class="row d-flex align-items-center justify-content-center h-100">
-          <div class="col-md-8 col-lg-7 col-xl-6">
-            <img src="images/loginimg.png" class="img-fluid" alt="Phone image">
-          </div>
-          <div class="col-md-7 col-lg-5 col-xl-5 offset-xl-1">
-            <h2 class="mb-2">Login Form</h2>
-
-            <!-- Bootstrap Alert for Login Validation -->
-            <?php
-            if (isset($_POST['login'])) {
-                $email = $_POST['email'];
-                $password = $_POST['password'];
-
-                // Check if any field is empty
-                if (empty($email) || empty($password)) {
-                    ?>
-                    <div class="alert alert-danger" role="alert">
-                        Please fill all fields
-                    </div>
-                    <?php
-                }
-                else {
-                    // Fetching data from the database to be matched in order to login
-                    $query = $pdo->prepare("SELECT * FROM customers WHERE email=:email");
-                    $query->bindParam(':email', $email);
+                    $query=$pdo->prepare('select * from admin where email=:pemail && password=:ppass');
+                    $query->bindParam("pemail",$email);
+                    $query->bindParam("ppass",$password);
                     $query->execute();
-
-                    $result = $query->fetch(PDO::FETCH_ASSOC);
-
-                    if ($result && $result['password'] == $password) {
-                        // Successful login
-                        $_SESSION['useremail'] = $result['email'];
-                        $_SESSION['cusid'] = $result['customer_id'];
-                        $_SESSION['username'] = $result['name'];
-                        $_SESSION['address'] = $result['address'];
-                        $_SESSION['work_phone'] = $result['work_phone'];
-                        $_SESSION['cell_phone'] = $result['cell_phone'];
-                        $_SESSION['date_of_birth'] = $result['date_of_birth'];
-                        ?>
-                        <script>
-                            location.assign('index.php');
-                        </script>
-                        <?php
-                    } else {
-                        // Invalid login
-                        ?>
-                        <div class="alert alert-danger" role="alert">
-                            Invalid email or password. Please try again.
-                        </div>
-                        <?php
-                    }
+                    $final = $query->fetch(PDO::FETCH_ASSOC);
+                    if ($final) {
+                        $_SESSION['uname'] = $final['name'];
+                        $_SESSION['uid'] = $final['id'];
+                        echo "<script>
+                                alert('Logged in successfully as: " . $_SESSION['uname'] . " And id is " . $_SESSION['uid'] . "');
+                                location.assign('index.php');
+                              </script>";
+                    } 
+                    else {
+                      echo "<script>alert('Invalid email or password');</script>";
+                  }
+                    
                 }
-            }
-            ?>
-            <!-- Bootstrap Alert ends here -->
-
-            <form method="POST">
-              <!-- Email input -->
-              <div class="form-outline mb-4">
-                <input name="email" type="email" id="form1Example13" class="form-control form-control-lg" />
-                <label class="form-label" for="form1Example13">Email address</label>
+                ?>
+                <!-- Login Form -->
+                <form method="POST">
+                  <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" class="form-control p_input" required>
+                  </div>
+                  <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" name="password" class="form-control p_input" required>
+                  </div>
+                  <div class="form-group d-flex align-items-center justify-content-between">
+                    <div class="form-check">
+                      <label class="form-check-label">
+                        <input type="checkbox" class="form-check-input"> Remember me
+                      </label>
+                    </div>
+                    <a href="#" class="forgot-pass">Forgot password</a>
+                  </div>
+                  <div class="text-center">
+                    <button type="submit" name="login" class="btn btn-primary btn-block enter-btn">Login</button>
+                  </div>
+                </form>
               </div>
-
-              <!-- Password input -->
-              <div class="form-outline mb-4">
-                <input name="password" type="password" id="form1Example23" class="form-control form-control-lg" />
-                <label class="form-label" for="form1Example23">Password</label>
-              </div>
-
-              <div class="d-flex justify-content-around align-items-center mb-4">
-                <!-- Checkbox -->
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" value="" id="form1Example3" checked />
-                  <label class="form-check-label" for="form1Example3"> Remember me </label>
-                </div>
-                <a href="#!">Forgot password?</a>
-              </div>
-
-              <!-- Login button -->
-              <button name="login" class="btn btn-primary btn-lg btn-block" onclick="return validateForm();">Log In</button>
-
-              <div class="my-3">
-                <h5>Don't have an account? <a href="signup.php">Click here!</a></h5>
-              </div>
-            </form>
+            </div>
           </div>
+          <!-- content-wrapper ends -->
         </div>
+        <!-- row ends -->
       </div>
-    </section>
-  </div>
-</div>
-
-
-
-<?php
-include('footer.php');
-?>
+      <!-- page-body-wrapper ends -->
+    </div>
+    <!-- container-scroller -->
+    <!-- plugins:js -->
+    <script src="assets/vendors/js/vendor.bundle.base.js"></script>
+    <!-- endinject -->
+    <!-- Plugin js for this page -->
+    <!-- End plugin js for this page -->
+    <!-- inject:js -->
+    <script src="assets/js/off-canvas.js"></script>
+    <script src="assets/js/hoverable-collapse.js"></script>
+    <script src="assets/js/misc.js"></script>
+    <script src="assets/js/settings.js"></script>
+    <script src="assets/js/todolist.js"></script>
+    <!-- endinject -->
+  </body>
+</html>
